@@ -155,7 +155,7 @@ func (a *App) NewStack(name string, opt NewOptions) (*Result, error) {
 	}
 
 	var res *Result
-	err := a.withRegistry(func(reg *model.Registry) error {
+	err := a.withRegistry(func(reg *model.Registry) (err error) {
 		if _, exists := reg.Stacks[name]; exists {
 			return errKind(ErrConflict, "stack %q is already registered (see `ports %s`)", name, name)
 		}
@@ -170,6 +170,12 @@ func (a *App) NewStack(name string, opt NewOptions) (*Result, error) {
 			if dir, err = store.CreateStackDir(a.Cfg.StackRoot, name); err != nil {
 				return err
 			}
+			defer func() {
+				if err != nil {
+					// Still under the lock; only succeeds if the directory is empty.
+					_ = os.Remove(dir)
+				}
+			}()
 		}
 		if ok, err := store.ManifestExists(dir); err != nil {
 			return err

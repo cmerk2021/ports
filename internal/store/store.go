@@ -204,6 +204,22 @@ func ManifestPath(dir string) string { return filepath.Join(dir, ".ports") }
 
 // checkManifestPath refuses symlinks and non-regular files at the manifest
 // location. It returns false if nothing exists there.
+// checkRealDir refuses to write into a stack directory that has been replaced
+// by a symlink or a non-directory since it was registered.
+func checkRealDir(dir string) error {
+	fi, err := os.Lstat(dir)
+	if err != nil {
+		return fmt.Errorf("cannot inspect stack directory %s: %w", dir, err)
+	}
+	if fi.Mode()&os.ModeSymlink != 0 {
+		return fmt.Errorf("%w: stack directory %s is a symlink; refusing to write through it", ErrUnsafePath, dir)
+	}
+	if !fi.IsDir() {
+		return fmt.Errorf("%w: %s is not a directory", ErrUnsafePath, dir)
+	}
+	return nil
+}
+
 func checkManifestPath(path string) (bool, error) {
 	fi, err := os.Lstat(path)
 	if errors.Is(err, fs.ErrNotExist) {
@@ -261,6 +277,9 @@ func ManifestExists(dir string) (bool, error) {
 // if any file already exists at the manifest path.
 func WriteManifest(dir string, m *model.Manifest, create bool) error {
 	path := ManifestPath(dir)
+	if err := checkRealDir(dir); err != nil {
+		return err
+	}
 	if _, err := checkManifestPath(path); err != nil {
 		return err
 	}
@@ -276,6 +295,9 @@ func WriteManifest(dir string, m *model.Manifest, create bool) error {
 
 // RestoreManifestBytes puts raw previous manifest content back (rollback).
 func RestoreManifestBytes(dir string, data []byte) error {
+	if err := checkRealDir(dir); err != nil {
+		return err
+	}
 	return WriteFileAtomic(ManifestPath(dir), data, 0o644, false)
 }
 

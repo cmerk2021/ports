@@ -700,3 +700,36 @@ func TestAuditAndRecord(t *testing.T) {
 		t.Fatalf("block should skip host listener at 12006: %v %v", res, err)
 	}
 }
+
+func TestRegisteredDirSwappedForSymlink(t *testing.T) {
+	e := newEnv(t)
+	dir := e.mkdir(t, "a")
+	if _, err := e.NewStack("a", NewOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	outside := t.TempDir()
+	data, _ := os.ReadFile(store.ManifestPath(dir))
+	os.WriteFile(filepath.Join(outside, ".ports"), data, 0o644)
+	os.RemoveAll(dir)
+	if err := os.Symlink(outside, dir); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.Assign("a", "web", 80, AssignOptions{}); err == nil {
+		t.Fatal("expected refusal to write through symlinked stack directory")
+	}
+	if b, _ := os.ReadFile(filepath.Join(outside, ".ports")); string(b) != string(data) {
+		t.Fatal("manifest outside the stack root was modified")
+	}
+}
+
+func TestInitDirRemovedOnFailure(t *testing.T) {
+	e := newEnv(t)
+	e.mkdir(t, "a")
+	e.NewStack("a", NewOptions{Fixed: mustFixed(t, "80")})
+	if _, err := e.NewStack("b", NewOptions{InitDir: true, Fixed: mustFixed(t, "80")}); !errors.Is(err, ErrConflict) {
+		t.Fatalf("got %v", err)
+	}
+	if _, err := os.Lstat(filepath.Join(e.root, "b")); !os.IsNotExist(err) {
+		t.Fatal("directory created by --init-dir left behind after failure")
+	}
+}
