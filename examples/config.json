@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "stack_root": "/opt/stacks",
+  "registry_path": "/var/lib/ports/registry.json",
+  "block_size": 5,
+  "dynamic_range": {
+    "start": 12000,
+    "end": 29999
+  },
+  "strategy": "first-fit",
+  "compose_files": [],
+  "docker_command": "docker",
+  "proc_net_dir": "/proc/net"
+}

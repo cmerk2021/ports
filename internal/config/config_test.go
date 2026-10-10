@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -67,5 +68,22 @@ func TestLoadErrors(t *testing.T) {
 	_, err := Load(Overrides{ConfigPath: filepath.Join(t.TempDir(), "missing.json")})
 	if err == nil || !strings.Contains(err.Error(), "cannot read config") {
 		t.Fatalf("explicit missing config: %v", err)
+	}
+}
+
+func TestExampleConfig(t *testing.T) {
+	clearEnv(t)
+	cfg, err := Load(Overrides{ConfigPath: filepath.Join("..", "..", "examples", "config.json")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := Default()
+	want.Path = cfg.Path
+	got := *cfg
+	if len(got.ComposeFiles) == 0 {
+		got.ComposeFiles = nil
+	}
+	if !reflect.DeepEqual(&got, want) {
+		t.Fatalf("example config differs from defaults: %+v", cfg)
 	}
 }

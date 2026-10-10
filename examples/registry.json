@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "created_at": "2026-10-10T18:48:42Z",
+  "updated_at": "2026-10-10T18:48:42Z",
+  "stacks": {
+    "jellyfin": {
+      "name": "jellyfin",
+      "directory": "/opt/stacks/jellyfin",
+      "allocations": [
+        {
+          "type": "fixed",
+          "start": 8096,
+          "end": 8096,
+          "protocol": "tcp",
+          "bind_address": "0.0.0.0",
+          "purpose": "web"
+        },
+        {
+          "type": "block",
+          "start": 12000,
+          "end": 12004,
+          "protocol": "both",
+          "bind_address": "0.0.0.0",
+          "purpose": "expansion"
+        }
+      ],
+      "assignments": [
+        {
+          "name": "dlna",
+          "host_port": 12000,
+          "container_port": 1900,
+          "protocol": "udp",
+          "bind_address": "0.0.0.0",
+          "purpose": "DLNA discovery",
+          "status": "assigned"
+        },
+        {
+          "name": "web",
+          "host_port": 8096,
+          "container_port": 8096,
+          "protocol": "tcp",
+          "bind_address": "0.0.0.0",
+          "purpose": "web UI",
+          "status": "assigned"
+        }
+      ],
+      "created_at": "2026-10-10T18:48:42Z",
+      "updated_at": "2026-10-10T18:48:42Z"
+    },
+    "nginx-proxy-manager": {
+      "name": "nginx-proxy-manager",
+      "directory": "/opt/stacks/nginx-proxy-manager",
+      "allocations": [
+        {
+          "type": "fixed",
+          "start": 80,
+          "end": 80,
+          "protocol": "tcp",
+          "bind_address": "0.0.0.0"
+        },
+        {
+          "type": "fixed",
+          "start": 81,
+          "end": 81,
+          "protocol": "tcp",
+          "bind_address": "0.0.0.0"
+        },
+        {
+          "type": "fixed",
+          "start": 443,
+          "end": 443,
+          "protocol": "tcp",
+          "bind_address": "0.0.0.0"
+        },
+        {
+          "type": "block",
+          "start": 12005,
+          "end": 12009,
+          "protocol": "both",
+          "bind_address": "0.0.0.0",
+          "purpose": "expansion"
+        }
+      ],
+      "assignments": [],
+      "created_at": "2026-10-10T18:48:42Z",
+      "updated_at": "2026-10-10T18:48:42Z"
+    }
+  }
+}

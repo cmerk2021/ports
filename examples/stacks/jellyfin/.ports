@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "stack": "jellyfin",
+  "directory": "/opt/stacks/jellyfin",
+  "allocations": [
+    {
+      "type": "fixed",
+      "start": 8096,
+      "end": 8096,
+      "protocol": "tcp",
+      "bind_address": "0.0.0.0",
+      "purpose": "web"
+    },
+    {
+      "type": "block",
+      "start": 12000,
+      "end": 12004,
+      "protocol": "both",
+      "bind_address": "0.0.0.0",
+      "purpose": "expansion"
+    }
+  ],
+  "assignments": [
+    {
+      "name": "dlna",
+      "host_port": 12000,
+      "container_port": 1900,
+      "protocol": "udp",
+      "bind_address": "0.0.0.0",
+      "purpose": "DLNA discovery",
+      "status": "assigned"
+    },
+    {
+      "name": "web",
+      "host_port": 8096,
+      "container_port": 8096,
+      "protocol": "tcp",
+      "bind_address": "0.0.0.0",
+      "purpose": "web UI",
+      "status": "assigned"
+    }
+  ],
+  "updated_at": "2026-10-10T18:48:42Z"
+}
