@@ -123,7 +123,7 @@ type NewOptions struct {
 
 // Result is a generic mutation result.
 type Result struct {
-	Stack    *model.Stack      `json:"stack"`
+	Stack    *model.Stack       `json:"stack"`
 	Added    []model.Allocation `json:"added_allocations,omitempty"`
 	Removed  []model.Allocation `json:"removed_allocations,omitempty"`
 	Assigned *model.Assignment  `json:"assignment,omitempty"`

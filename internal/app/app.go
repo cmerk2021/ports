@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/cmerk2021/ports/internal/compose"
@@ -68,10 +69,12 @@ type App struct {
 // New returns an App using real Docker and /proc inspection.
 func New(cfg *config.Config) *App {
 	return &App{
-		Cfg:      cfg,
-		Runner:   compose.ExecRunner{Command: cfg.DockerCommand},
-		Now:      func() time.Time { return time.Now().UTC().Truncate(time.Second) },
-		Confirm:  func(string) error { return errKind(ErrDeclined, "this operation requires confirmation; re-run with --yes") },
+		Cfg:    cfg,
+		Runner: compose.ExecRunner{Command: cfg.DockerCommand},
+		Now:    func() time.Time { return time.Now().UTC().Truncate(time.Second) },
+		Confirm: func(string) error {
+			return errKind(ErrDeclined, "this operation requires confirmation; re-run with --yes")
+		},
 		HostScan: func() *hostports.Snapshot { return hostports.Scan(cfg.ProcNetDir) },
 	}
 }
@@ -120,6 +123,9 @@ func lookupStack(reg *model.Registry, name string) (*model.Stack, error) {
 	}
 	s, ok := reg.Stacks[name]
 	if !ok {
+		if _, err := strconv.Atoi(name); err == nil {
+			return nil, errKind(ErrNotFound, "stack %q is not registered (to look up a port use `ports find %s`)", name, name)
+		}
 		return nil, errKind(ErrNotFound, "stack %q is not registered (see `ports list`)", name)
 	}
 	return s, nil

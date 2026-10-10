@@ -113,7 +113,8 @@ func (r ExecRunner) Config(ctx context.Context, dir string, files []string) ([]b
 func Inspect(ctx context.Context, r Runner, dir string, files []string) (*Result, error) {
 	stdout, stderr, err := r.Config(ctx, dir, files)
 	if err != nil {
-		if errors.Is(err, ErrUnavailable) {
+		var ce *ConfigError
+		if errors.Is(err, ErrUnavailable) || errors.As(err, &ce) {
 			return nil, err
 		}
 		msg := cleanStderr(stderr)
